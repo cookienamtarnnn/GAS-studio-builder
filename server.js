@@ -16,10 +16,18 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// Initialize AI clients
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '')
+// Initialize AI clients (with fallbacks for missing keys)
+const openai = process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes('placeholder')
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null
+
+const anthropic = process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_API_KEY.includes('placeholder')
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null
+
+const genAI = process.env.GOOGLE_API_KEY && !process.env.GOOGLE_API_KEY.includes('placeholder')
+  ? new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
+  : null
 
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
@@ -47,6 +55,9 @@ Provide helpful suggestions and code improvements. If you want to update code, r
 }`
 
     if (model === 'openai') {
+      if (!openai) {
+        return res.status(400).json({ error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to .env file' })
+      }
       const completion = await openai.chat.completions.create({
         model: 'gpt-4',
         messages: [
@@ -56,6 +67,9 @@ Provide helpful suggestions and code improvements. If you want to update code, r
       })
       response = completion.choices[0].message.content || ''
     } else if (model === 'claude') {
+      if (!anthropic) {
+        return res.status(400).json({ error: 'Anthropic API key not configured. Please add ANTHROPIC_API_KEY to .env file' })
+      }
       const completion = await anthropic.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 4096,
@@ -67,6 +81,9 @@ Provide helpful suggestions and code improvements. If you want to update code, r
       })
       response = completion.content[0].type === 'text' ? completion.content[0].text : ''
     } else if (model === 'gemini') {
+      if (!genAI) {
+        return res.status(400).json({ error: 'Google API key not configured. Please add GOOGLE_API_KEY to .env file' })
+      }
       const geminiModel = genAI.getGenerativeModel({ model: 'gemini-pro' })
       const chat = geminiModel.startChat({
         history: messages.slice(0, -1).map((m) => ({
