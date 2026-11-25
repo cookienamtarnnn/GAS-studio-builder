@@ -7,7 +7,7 @@
     "dev": "vite",
     "server": "node server.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
-    "build": "npm run build:client && npm run build:server",
+    "build": "vite build",
     "build:client": "vite build",
     "build:server": "rm -rf dist && mkdir -p dist && cp appsscript.json dist/ && cp -R src/server/* dist/ 2>/dev/null; echo 'Server build complete'",
     "build:preview": "vite preview",
