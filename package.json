@@ -7,9 +7,12 @@
     "dev": "vite",
     "server": "node server.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build",
+    "build:server": "mkdir -p dist && cp appsscript.json dist/ && cp -R src/server/* dist/",
+    "build:preview": "vite preview",
+    "push": "npm run build && clasp push",
+    "lint": "oxlint"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.13.0",
@@ -37,6 +40,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "oxlint": "^1.90.0",
     "typescript": "~7.0.2",
-    "vite": "^8.3.6"
+    "vite": "^8.3.6",
+    "vite-plugin-singlefile": "^2.0.0"
   }
 }
