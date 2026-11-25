@@ -13,6 +13,25 @@ function App() {
   const [activeFile, setActiveFile] = useState<'Code.gs' | 'index.html'>('Code.gs')
   const [previewUrl, setPreviewUrl] = useState<string>('')
   
+  // Theme state
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('gas-studio-theme') as 'dark' | 'light' | null
+    if (savedTheme) {
+      setTheme(savedTheme)
+      document.documentElement.setAttribute('data-theme', savedTheme)
+    }
+  }, [])
+  
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(newTheme)
+    localStorage.setItem('gas-studio-theme', newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+  }
+  
   // Panel state
   const [panels, setPanels] = useState({
     chat: { isOpen: false, width: 320 },
@@ -83,6 +102,48 @@ function App() {
       preview: { ...panels.preview, isOpen: false }
     })
   }
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMod = e.metaKey || e.ctrlKey
+      
+      // ⌘K - Command palette (future feature)
+      if (isMod && e.key === 'k') {
+        e.preventDefault()
+        // TODO: Open command palette
+        console.log('Command palette - coming soon!')
+      }
+      
+      // ⌘B - Toggle chat panel
+      if (isMod && e.key === 'b') {
+        e.preventDefault()
+        togglePanel('chat')
+      }
+      
+      // ⌘P - Toggle preview panel
+      if (isMod && e.key === 'p') {
+        e.preventDefault()
+        togglePanel('preview')
+      }
+      
+      // ⌘⇧L - Toggle theme
+      if (isMod && e.shiftKey && e.key === 'L') {
+        e.preventDefault()
+        toggleTheme()
+      }
+      
+      // Esc - Close all panels
+      if (e.key === 'Escape') {
+        if (isAnyPanelOpen) {
+          closeAllPanels()
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [panels, theme])
 
   const isAnyPanelOpen = panels.chat.isOpen || panels.preview.isOpen
 
@@ -174,6 +235,21 @@ function App() {
             <span className="sm:hidden">🤖</span>
           </button>
           
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="px-2 py-1.5 text-sm rounded transition-all flex-shrink-0"
+            style={{
+              background: 'var(--color-bg-tertiary)',
+              color: 'var(--color-text-primary)',
+              borderWidth: '1px',
+              borderColor: 'var(--color-border-subtle)'
+            }}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode (⌘⇧L)`}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          
           {/* Command Palette Hint - Desktop only */}
           <div className="hidden lg:flex items-center gap-2 text-xs text-mono flex-shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
             <kbd className="px-2 py-1 rounded" style={{ background: 'var(--color-bg-tertiary)', borderWidth: '1px', borderColor: 'var(--color-border-subtle)' }}>⌘K</kbd>
@@ -218,6 +294,7 @@ function App() {
             activeFile={activeFile}
             onFileChange={setActiveFile}
             onCodeChange={handleCodeChange}
+            theme={theme}
           />
         </div>
 
