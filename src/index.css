@@ -1,17 +1,469 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+:root {
+  /* Cursor-inspired warm dark palette */
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #121212;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-elevated: #1e1e1e;
+  
+  /* Warm borders (oklab-inspired) */
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-medium: rgba(255, 255, 255, 0.10);
+  --color-border-strong: rgba(255, 255, 255, 0.15);
+  
+  /* Text hierarchy */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.70);
+  --color-text-tertiary: rgba(255, 255, 255, 0.45);
+  --color-text-muted: rgba(255, 255, 255, 0.30);
+  
+  /* Accent gradient (Cursor-inspired) */
+  --color-accent-start: #8b5cf6;
+  --color-accent-end: #3b82f6;
+  --color-accent-hover: #a78bfa;
+  
+  /* Semantic */
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  
+  /* Shadows (atmospheric, Cursor-style) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.5);
+  
+  /* Responsive spacing */
+  --spacing-unit: 1rem;
+  --header-height: 3.5rem;
+  --panel-min-width: 280px;
+  --panel-max-width: 480px;
+  
+  font-family: 'Geist', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+}
+
+/* Responsive Typography */
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  :root {
+    --header-height: 3rem;
+    --spacing-unit: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+  
+  :root {
+    --header-height: 2.75rem;
+    --spacing-unit: 0.5rem;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+/* Mobile scrollbar (thinner) */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+/* Utilities */
+.gradient-accent {
+  background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end));
+}
+
+.border-subtle {
+  border-color: var(--color-border-subtle);
+}
+
+.border-medium {
+  border-color: var(--color-border-medium);
+}
+
+.text-mono {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  letter-spacing: -0.02em;
+}
+
+/* Responsive Container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  overflow: hidden;
+}
+
+/* Responsive Header */
+.app-header {
+  flex-shrink: 0;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-secondary);
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 0.75rem;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0 0.5rem;
+    gap: 0.25rem;
+  }
+}
+
+/* Responsive Main Layout */
+.app-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Mobile: Stack vertically with tabs */
+@media (max-width: 1024px) {
+  .app-main {
+    flex-direction: column;
+  }
+}
+
+/* Panel Transitions */
+.panel-sliding {
+  transition: width 300ms ease-out, transform 300ms ease-out;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .panel-sliding {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .panel-sliding.panel-left {
+    left: 0;
+    transform: translateX(-100%);
+  }
+  
+  .panel-sliding.panel-left.panel-open {
+    transform: translateX(0);
+  }
+  
+  .panel-sliding.panel-right {
+    right: 0;
+    transform: translateX(100%);
+  }
+  
+  .panel-sliding.panel-right.panel-open {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile overlay */
+.mobile-overlay {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .mobile-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease-out;
+  }
+  
+  .mobile-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Editor - Always visible, flex to fill */
+.editor-pane {
+  flex: 1;
+  min-width: 0; /* Allow flex shrink */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive Deploy Panel */
+.deploy-panel {
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-secondary);
+}
+
+.deploy-panel-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1024px) {
+  .deploy-panel-content {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .deploy-panel-content {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.5rem;
+  }
+}
+
+/* Responsive Buttons */
+.btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  transition: all 150ms ease;
+  white-space: nowrap;
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+}
+
+/* Responsive Inputs */
+input[type="text"],
+input[type="password"],
+select {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  outline: none;
+  transition: border-color 200ms ease;
+}
+
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="password"],
+  select {
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Modal Responsive */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 100%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    padding: 1rem;
+  }
+}
+
+/* Touch-friendly hit targets (minimum 44x44px) */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  input[type="text"],
+  input[type="password"],
+  select {
+    min-height: 44px;
+  }
+}
+
+/* Hide elements on mobile */
+.mobile-hidden {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
+  }
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+}
+
+/* Flexbox utilities */
+.flex-1 {
+  flex: 1;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Safe area insets for iOS notch/home indicator */
+@supports (padding: max(0px)) {
+  .app-header {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  
+  .deploy-panel {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  :root {
+    --header-height: 2.5rem;
+  }
+  
+  .deploy-panel-content {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}
+
+/* Print styles */
+@media print {
+  .app-header,
+  .deploy-panel,
+  .panel-sliding {
+    display: none !important;
+  }
+  
+  .editor-pane {
+    width: 100% !important;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border-subtle: rgba(255, 255, 255, 0.15);
+    --color-border-medium: rgba(255, 255, 255, 0.25);
+    --color-border-strong: rgba(255, 255, 255, 0.40);
+  }
+}
+
+/* Dark mode (forced) */
+@media (prefers-color-scheme: light) {
+  /* Keep dark theme even in light mode preference */
+  /* This is an IDE - dark is preferred */
 }
