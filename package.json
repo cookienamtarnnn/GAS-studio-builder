@@ -9,7 +9,7 @@
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
-    "build:server": "mkdir -p dist && cp appsscript.json dist/ && cp -R src/server/* dist/",
+    "build:server": "rm -rf dist && mkdir -p dist && cp appsscript.json dist/ && cp -R src/server/* dist/",
     "build:preview": "vite preview",
     "push": "npm run build && clasp push",
     "lint": "oxlint"
